@@ -57,10 +57,12 @@ class SimpleUI16x2 {
 		uint8_t displayLightPin; //The pin to control the display-light. Set in the constructor
 		uint8_t brightness_=100; //The display brightness, if setable
 	public:
-		/**
-		 * lcd: The LiquidCrystal Object, create with 'new LiquidCrystal(param)'. 
-		 * getButton: the function to read out the buttons, see examples and the button-codes above
-		 * display_light_pin if your display light is controlled with an pin, you can set it here
+		/** The Constructor. Used to configure the UI.
+		 *  @param[in] lcd 					The LiquidCrystal Object, create with 'new LiquidCrystal(param)'. 
+		 *  @param[in] getButton 			The function to read out the buttons, see examples and the 
+		 *  								button-codes above
+		 *  @param[in] display_light_pin 	If your display light is controlled with an pin, you can set it
+		 *  								here. 0 means undefined.
 		 */
 		SimpleUI16x2(LiquidCrystal *lcd, uint8_t (*getButton)(), uint8_t disp_light_pin=0){
 			this->displayLightPin=disp_light_pin;
@@ -70,33 +72,125 @@ class SimpleUI16x2 {
 			lcd->clear();
 		}
 
-		//Easy Output with Autoclean
+		//@TODO accept more than strings.
+		/** Easy Output with Autoclean
+		 *  @param[in] text 	The Text to write
+		 */
 		void write(char* text);
+		/** Easy Output with Autoclean
+		 *  @param[in] text1 	Text for the first row
+		 *  @param[in] text2 	Text for the second row
+		 */
 		void write(char* text1, char* text2);
+		/** Easy Output with Autoclean
+		 *  @param[in] row 		The row to write in. (0,1)
+		 *  @param[in] column   The column to start. (0,...,16)
+		 *  @param[in] text 	The text to write
+		 *  @TODO Test if (0,1) and (0,...,16) are correct
+		 */
 		void write(uint8_t row, short column, char* text);
 
 		//Output Modification (Write something into the old screen(=>No Autoclean))
+		/** Write something on the old screen.
+		 *  @param[in] row 		The row to write in. (0,1)
+		 *  @param[in] column   The column to start. (0,...,16)
+		 *  @param[in] text 	The text to write
+		 */
 		void overwrite(uint8_t row, short column, char* text);
+		/** Clears the display but does not turn off the light.
+		 */
 		void clear();
 
 		//Displaylight
+		/** Modifies the display light by seting the PWM of the displaylight to brightness.
+		 *  The DisplayLightPin has to be set.
+		 *  @param[in] brightness 	The PWM-Value
+		 */
 		void setBrightness(uint8_t brightness);
+		/** Turns the display light on or off
+		 *  The DisplayLightPin has to be set
+		 *  @param[in] toOn 	true->On, false->Off
+		 */
 		void setDisplaylight(bool toOn);
+		/** Clears the display and turns off the light.
+		 *  The DisplayLightPin has to be set to turn off the light
+		 */
 		void turnOff(); //Clears Displays and turn of light
+		/** Returns the DisplayLight-PWM.
+		 *  @return The value of brightness_
+		 */
 		uint8_t getBrightness(){ return brightness_;}
 
-		//UI (HighUI)
-		int8_t showMenu(char* title,char** text, bool allow_abort=true, int8_t i=0);
+		
+		
+		/** Shows a menu in which you can navigate through using the UP and DOWN Keys. 
+		 *  Select an Entry using the RIGHT or SELECT keys. Abort with LEFT, if allowed.
+		 *  @param[in] title 		The Menu-Title
+		 *  @param[in] text 		An Array with the Menu-Entries
+		 *  @param[in] allow_abort 	Allows aborting with the LEFT key
+		 *  @param[in] i 			The entry displayed first, normally the entry 0
+		 *  @return The entry selected (0,...,n-1) or -1 if aborted
+		 */
+		int8_t showMenu(char* title, char** text, bool allow_abort=true, int8_t i=0);
+
+		/** Creates a numberinput. The sumand, a decimal power, can be changed using the LEFT and RIGHT keys.
+		 *  Add or substract the summand by using UP and DOWN. Finish with SELECT.
+		 *  @param[in] def 	The value to start with
+		 *  @bug does not work yet
+		 *  @return The number input
+		 */
 		uint16_t getUInt(uint16_t def=0);
+
+		/** Creates a string input (letters and numbers). Similar to game consoles.
+		 *  Use LEFT and RIGHT to change the position. UP and DOWN to change the symbol. SELECT to finish.
+		 *  @TODO allow to change the symbollist.
+		 *  @param[in,out] buffer 		To be displayed and written in.
+		 *  @bug doesnt work as expected if the buffer contains illegal symbols
+		 *  @param[in] maxLenght 		The buffersize
+		 *  @TODO I guess maxLength is not a good name for the buffersize
+		 *  @param[in] dontClearBuffer 	If set to true(default) the buffer will be cleaned up.
+		 */
 		uint8_t getString(char* buffer, uint8_t maxLength, bool dontClearBuffer=false);
-		uint8_t getPercent(char* title, uint8_t def, void(*onChange)(uint8_t x));
+
+		/** Creates a input for percents. Use LEFT and RIGHT to make 10% steps, UP and DOWN for 1% steps.
+		 *  A function can be called every time the value changes if you want to give the user an 
+		 *  example(volume etc.)
+		 *  @param[in] title 	The title of the input
+		 *  @param[in] def 		The start-value
+		 *  @param[in] onChange The function to be called on changes. 0 means undefined.
+		 *  @return returns the value
+		 */ 
+		uint8_t getPercent(char* title, uint8_t def, void(*onChange)(uint8_t x)=0);
+
+		/** Waits for a button or Serial-Input and calls the function. If the function is undefined (0) 
+		 *  the button (or Serial) will be ignored. 
+		 *  @TODO Create a option to autoloop.
+		 *  @param[in] selectPressed 	Called if SELECT is pressed. 0 to ignore.
+		 *  @param[in] leftPressed 		Called if LEFT is pressed. 0 to ignore.
+		 *  @param[in] upPressed 		Called if UP is pressed. 0 to ignore.
+		 *  @param[in] downPressed 		Called if DOWN is pressed. 0 to ignore.
+		 *  @param[in] rightPressed 	Called if RIGHT is pressed. 0 to ignore.
+		 *  @param[in] serialInput 		Called if Serial.isAvailable(). 0 to ignore.
+		 */
 		void sleep(void (*selectPressed)(), void (*leftPressed)(), void (*upPressed)(), void (*downPressed)(), void (*rightPressed)(), void (*serialInput)());//Waiting for an action
 
-		//ButtonInput (LowUI)
+		/** Waits for a button to be pressed.
+		 *  @return the code for the pressed Button.
+		 *  @TODO debounce. I have an hardwaredebounce
+		 */
 		uint8_t waitButton();
+		/** Waits for a button to be released. 
+		 *  @return the released button.
+		 *  @TODO debounce. I have an hardwaredebounce
+		 */
 		uint8_t waitButtonRelease();
 
-		//HelpFunctions
+		/** Writes a number as string into a buffer.
+		 *  @param[in] input 		The number to be converted to string
+		 *  @param[out] buffer 		The buffer to write in
+		 *  @param[in] buffersize 	The size of the buffer.
+		 *  @return The size of the buffer used.
+		 */
 		uint8_t toString(uint16_t input, char* buffer, uint8_t bufferSize);
 
 	private:
