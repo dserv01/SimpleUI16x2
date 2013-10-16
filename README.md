@@ -32,4 +32,5 @@ This library provides a simple User Interface for Input and Output with an
  It only works with LiquidCrystal-Library-Displays, but you should have no problem to wrap any other
  display-library or change this library.
 
-
+Please see also (german and english): 
+http://www.dserv01.de/2013/10/einfaches-arduino-userinterface-mit-16x2-display/
