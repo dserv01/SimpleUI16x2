@@ -72,7 +72,7 @@ class SimpleUI16x2 {
 		LiquidCrystal *lcd; //The display to write on. Set in the constructor
 		uint8_t (*getButton)(); //The function to get the pressed key. Set in the constructor
 		uint8_t displayLightPin; //The pin to control the display-light. Set in the constructor
-		uint8_t brightness_=100; //The display brightness, if setable
+		uint8_t brightness_; //The display brightness, if setable
 	public:
 		/** The Constructor. Used to configure the UI.
 		 *  @param[in] lcd 					The LiquidCrystal Object, create with 'new LiquidCrystal(param)'. 
@@ -85,6 +85,7 @@ class SimpleUI16x2 {
 			this->displayLightPin=disp_light_pin;
 			this->getButton=getButton;
 			this->lcd=lcd;
+			this->brightness_=100;
 			lcd->begin(16,2); //May be have to changed for some displays  which are not 16x2
 			lcd->clear();
 		}
