@@ -95,7 +95,7 @@ uint16_t SimpleUI16x2::tenpot(uint8_t n){
 }
 uint16_t SimpleUI16x2::getUInt(uint16_t def){
 	uint16_t pos=1;
-	uint16_t rVal=0;
+	uint16_t rVal=def;
 	while(true){
 		{
 			char buffer[10];
